@@ -1,0 +1,132 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "numDataDisks": {
+      "type": "string",
+      "allowedValues": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "metadata": {
+        "description": "This parameter allows the user to select the number of disks they want"
+      }
+    },
+    "diskStorageAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the storage account where the data disks are stored"
+      }
+    },
+    "diskCaching": {
+      "type": "string",
+      "allowedValues": [
+        "None",
+        "ReadOnly",
+        "ReadWrite"
+      ],
+      "metadata": {
+        "description": "Caching type for the data disks"
+      }
+    },
+    "vmStAccountContainerName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the storage account Container Name"
+      }
+    },
+    "masterName": {
+      "type": "string",
+      "metadata": {
+        "description": "Master Host Name"
+      }
+    },
+    "diskSizeGB": {
+      "type": "int",
+      "minValue": 1,
+      "maxValue": 1023,
+      "metadata": {
+        "description": "Size of the data disks"
+      }
+    }
+  },
+  "variables": {
+    "_comment1": "disksArray is ugly :( but it gets the job done. If anyone can make it better, please do!",
+    "disksArray": {
+      "0": [],
+      "1": "[variables('dataDisks')['1']]",
+      "2": "[concat(variables('dataDisks')['1'], variables('dataDisks')['2'])]",
+      "3": "[concat(variables('dataDisks')['1'], variables('dataDisks')['2'], variables('dataDisks')['3'])]",
+      "4": "[variables('diskDeltas')['4delta']]"
+    },
+    "dataDisks": {
+      "1": [
+        {
+          "name": "datadisk0",
+          "diskSizeGB": "[parameters('diskSizeGB')]",
+          "lun": 0,
+          "vhd": {
+            "Uri": "[concat('http://',parameters('diskStorageAccountName'),'.blob.core.windows.net/',parameters('vmStAccountContainerName'),'/',parameters('masterName'),'-datadisk0.vhd')]"
+          },
+          "caching": "None",
+          "createOption": "Empty"
+        }
+      ],
+      "2": [
+        {
+          "name": "datadisk1",
+          "diskSizeGB": "[parameters('diskSizeGB')]",
+          "lun": 1,
+          "vhd": {
+            "Uri": "[concat('http://',parameters('diskStorageAccountName'),'.blob.core.windows.net/',parameters('vmStAccountContainerName'),'/',parameters('masterName'),'-datadisk1.vhd')]"
+          },
+          "caching": "None",
+          "createOption": "Empty"
+        }
+      ],
+      "3": [
+        {
+          "name": "datadisk2",
+          "diskSizeGB": "[parameters('diskSizeGB')]",
+          "lun": 2,
+          "vhd": {
+            "Uri": "[concat('http://',parameters('diskStorageAccountName'),'.blob.core.windows.net/',parameters('vmStAccountContainerName'),'/',parameters('masterName'),'-datadisk2.vhd')]"
+          },
+          "caching": "None",
+          "createOption": "Empty"
+        }
+      ],
+      "4": [
+        {
+          "name": "datadisk3",
+          "diskSizeGB": "[parameters('diskSizeGB')]",
+          "lun": 3,
+          "vhd": {
+            "Uri": "[concat('http://',parameters('diskStorageAccountName'),'.blob.core.windows.net/',parameters('vmStAccountContainerName'),'/',parameters('masterName'),'-datadisk3.vhd')]"
+          },
+          "caching": "None",
+          "createOption": "Empty"
+        }
+      ]
+    },
+    "_comment2": "The delta arrays below build the difference from 0 to 4, 4 to 8, 8 to 12 disks and so on",
+    "diskDeltas": {
+      "4delta": [
+        "[variables('dataDisks')['1'][0]]",
+        "[variables('dataDisks')['2'][0]]",
+        "[variables('dataDisks')['3'][0]]",
+        "[variables('dataDisks')['4'][0]]"
+      ]
+    }
+  },
+  "resources": [],
+  "outputs": {
+    "dataDiskArray": {
+      "type": "array",
+      "value": "[variables('disksArray')[parameters('numDataDisks')]]"
+    }
+  }
+}
