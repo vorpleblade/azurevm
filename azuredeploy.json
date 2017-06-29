@@ -161,9 +161,9 @@
     },
     "masterVMName": {
       "type": "string",
-      "defaultValue": "sftpcentos",
+      "defaultValue": "centos",
       "allowedValues": [
-        "sftpcentos",
+        "centos",
         "ubuntuserver"
       ],
       "metadata": {
